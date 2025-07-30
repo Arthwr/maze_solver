@@ -72,6 +72,12 @@ class Cell:
 
         self._win = window
 
+    def _center(self):
+        """Return (cx, cy) center of this cell in canvas coordinates."""
+        cx = (self._x1 + self._x2) / 2
+        cy = (self._y1 + self._y2) / 2
+        return cx, cy
+
     def _draw_wall(self, x1, y1, x2, y2):
         """Helper method to draw a wall (line) using the window's draw_line()."""
         self._win.draw_line(Line(Point(x1, y1), Point(x2, y2)))
@@ -81,13 +87,31 @@ class Cell:
         self._x1, self._y1, self._x2, self._y2 = x1, y1, x2, y2
 
         if self.has_left_wall:
-            self._draw_wall(x1, y1, x1, y2)  # left
+            self._draw_wall(x1, y1, x1, y2)
 
         if self.has_top_wall:
-            self._draw_wall(x1, y2, x2, y2)  # top
+            self._draw_wall(x1, y2, x2, y2)
 
         if self.has_right_wall:
-            self._draw_wall(x2, y2, x2, y1)  # right
+            self._draw_wall(x2, y2, x2, y1)
 
         if self.has_bottom_wall:
-            self._draw_wall(x1, y1, x2, y1)  # bottom
+            self._draw_wall(x1, y1, x2, y1)
+
+    def draw_move(self, to_cell, undo=False):
+        """
+        Draw a move from this cell to the neighboring cell.
+        Draw center-to-center so the path stays inside the cells.
+        """
+        x_center, y_center = self._center()
+        x_center2, y_center2 = to_cell._center()
+
+        fill_color = "gray" if undo else "red"
+
+        self._win.draw_line(
+            Line(
+                Point(x_center, y_center),
+                Point(x_center2, y_center2),
+            ),
+            fill_color,
+        )
