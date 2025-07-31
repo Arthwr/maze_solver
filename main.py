@@ -1,18 +1,18 @@
-from graphics import Window, Line, Point, Cell
+from graphics import Window, Cell, Maze
+from pprint import pprint
 
 
 def main():
-    win = Window(800, 600)
+    num_rows = 12
+    num_cols = 16
+    margin = 50
+    screen_x = 800
+    screen_y = 600
 
-    c = Cell(win)
-    c.has_right_wall = False
-    c.draw(100, 100, 200, 200)
-
-    c2 = Cell(win)
-    c2.has_left_wall = False
-    c2.draw(200, 100, 300, 200)
-
-    c.draw_move(c2)
+    cell_size_x = (screen_x - 2 * margin) / num_cols
+    cell_size_y = (screen_y - 2 * margin) / num_rows
+    win = Window(screen_x, screen_y)
+    maze = Maze(margin, margin, num_rows, num_cols, cell_size_x, cell_size_y, win)
 
     win.wait_for_close()
 
