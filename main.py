@@ -1,5 +1,4 @@
-from graphics import Window, Cell, Maze
-from pprint import pprint
+from graphics import Window, Maze
 
 
 def main():
