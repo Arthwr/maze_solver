@@ -35,7 +35,7 @@ class Maze:
         self._create_cells()
         self.draw()
         self._break_entrance_and_exit()
-        self._break_walls_r(0, 0)
+        self._break_walls(0, 0)
 
     def _animate(self) -> None:
         """
@@ -82,30 +82,35 @@ class Maze:
         exit_cell.has_bottom_wall = False
         self._draw_cell(len(self._cells) - 1, len(self._cells[0]) - 1)
 
-    def _break_walls_r(self, i: int, j: int) -> None:
+    def _break_walls(self, start_i: int, start_j: int) -> None:
         """
-        Recursively generates a maze using randomized DFS by breaking walls between unvisited neighboring cells.
+        Generate a maze by breaking walls between random unvisited neighboring cells in a depth-first manner.
         """
-        current_cell = self._cells[i][j]
-        current_cell.visited = True
+        stack = [(start_i, start_j)]
+        self._cells[start_i][start_j].visited = True
 
-        directions = []
+        while stack:
+            # Peek at current cell
+            i, j = stack[-1]
+            current_cell = self._cells[i][j]
 
-        if i > 0 and not self._cells[i - 1][j].visited:
-            directions.append(("top", i - 1, j))
-        if j < self._num_cols - 1 and not self._cells[i][j + 1].visited:
-            directions.append(("right", i, j + 1))
-        if i < self._num_rows - 1 and not self._cells[i + 1][j].visited:
-            directions.append(("bottom", i + 1, j))
-        if j > 0 and not self._cells[i][j - 1].visited:
-            directions.append(("left", i, j - 1))
+            # Gather all unvisited neighboring cells and their directions
+            neightbours = []
+            if i > 0 and not self._cells[i - 1][j].visited:
+                neightbours.append(("top", i - 1, j))
+            if j < self._num_cols - 1 and not self._cells[i][j + 1].visited:
+                neightbours.append(("right", i, j + 1))
+            if i < self._num_rows - 1 and not self._cells[i + 1][j].visited:
+                neightbours.append(("bottom", i + 1, j))
+            if j > 0 and not self._cells[i][j - 1].visited:
+                neightbours.append(("left", i, j - 1))
 
-        random.shuffle(directions)
+            if neightbours:
+                # Choose random unvisited neighbore and remove wall between them
+                direction, ni, nj = random.choice(neightbours)
+                next_cell = self._cells[ni][nj]
+                next_cell.visited = True
 
-        for direction, ni, nj in directions:
-            next_cell = self._cells[ni][nj]
-
-            if not next_cell.visited:
                 if direction == "top":
                     current_cell.has_top_wall = False
                     next_cell.has_bottom_wall = False
@@ -119,9 +124,15 @@ class Maze:
                     current_cell.has_left_wall = False
                     next_cell.has_right_wall = False
 
+                # Push newly visited cell to the stack
+                stack.append((ni, nj))
+
+                # Redraw both cells to update GUI
                 self._draw_cell(i, j)
                 self._draw_cell(ni, nj)
-                self._break_walls_r(ni, nj)
+            else:
+                # No valid neighbors -> backtrack
+                stack.pop()
 
     def _create_cells(self) -> None:
         """
