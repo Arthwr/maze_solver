@@ -36,6 +36,7 @@ class Maze:
         self.draw()
         self._break_entrance_and_exit()
         self._break_walls(0, 0)
+        self._reset_cells_visited()
 
     def _animate(self) -> None:
         """
@@ -143,6 +144,11 @@ class Maze:
             for _col in range(self._num_cols):
                 row_cells.append(Cell(self._win))
             self._cells.append(row_cells)
+
+    def _reset_cells_visited(self) -> None:
+        for row in self._cells:
+            for cell in row:
+                cell.visited = False
 
     def draw(self) -> None:
         """
