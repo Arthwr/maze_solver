@@ -1,10 +1,11 @@
 from graphics import Line, Point
+from graphics import Window
 
 
 class Cell:
     """Represents a single cell in the maze grid."""
 
-    def __init__(self, window: "Window" = None):
+    def __init__(self, window: Window = None):
         self.has_left_wall: bool = True
         self.has_right_wall: bool = True
         self.has_top_wall: bool = True

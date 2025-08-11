@@ -93,7 +93,7 @@ class Maze:
         while stack:
             # Peek at current cell
             i, j = stack[-1]
-            current_cell = self._cells[i][j]
+            current_cell: Cell = self._cells[i][j]
 
             # Gather all unvisited neighboring cells and their directions
             neightbours = []
@@ -107,7 +107,7 @@ class Maze:
                 neightbours.append(("left", i, j - 1))
 
             if neightbours:
-                # Choose random unvisited neighbore and remove wall between them
+                # Choose random unvisited neighbour and remove wall between them
                 direction, ni, nj = random.choice(neightbours)
                 next_cell = self._cells[ni][nj]
                 next_cell.visited = True
@@ -135,6 +135,60 @@ class Maze:
                 # No valid neighbors -> backtrack
                 stack.pop()
 
+    def _render_path_r(self, start_i, start_j, end_i, end_j):
+        """Draws a path step and recursively attempts to solve the maze."""
+        current_cell = self._cells[start_i][start_j]
+        destination_cell = self._cells[end_i][end_j]
+
+        current_cell.draw_move(destination_cell)
+
+        if self._solve(end_i, end_j):
+            return True
+
+        # Undo move if dead end
+        destination_cell.draw_move(current_cell, True)
+        return False
+
+    def _solve(self, i, j):
+        """Recursive DFS maze solver with random neighbor exploration."""
+        self._animate()
+
+        current_cell: Cell = self._cells[i][j]
+        current_cell.visited = True
+
+        # Found solutin path
+        if (i, j) == (self._num_rows - 1, self._num_cols - 1):
+            return True
+
+        def can_visit(ni, nj, wall_check):
+            """Return True if neighbour is within bounds, no wall, and unvisited."""
+            return (
+                0 <= ni < self._num_rows
+                and 0 <= nj < self._num_cols
+                and not wall_check
+                and not self._cells[ni][nj].visited
+            )
+
+        # Collect all valid neighbors
+        neightbours = []
+        if can_visit(i - 1, j, current_cell.has_top_wall):
+            neightbours.append((i - 1, j))
+        if can_visit(i, j + 1, current_cell.has_right_wall):
+            neightbours.append((i, j + 1))
+        if can_visit(i + 1, j, current_cell.has_bottom_wall):
+            neightbours.append((i + 1, j))
+        if can_visit(i, j - 1, current_cell.has_left_wall):
+            neightbours.append((i, j - 1))
+
+        # Randomize order for variation in path
+        random.shuffle(neightbours)
+
+        for ni, nj in neightbours:
+            if self._render_path_r(i, j, ni, nj):
+                return True
+
+        return False
+
     def _create_cells(self) -> None:
         """
         Initialize the grid of Cell objects.
@@ -157,3 +211,6 @@ class Maze:
         for row in range(self._num_rows):
             for col in range(self._num_cols):
                 self._draw_cell(row, col)
+
+    def solve(self) -> None:
+        return self._solve(0, 0)
